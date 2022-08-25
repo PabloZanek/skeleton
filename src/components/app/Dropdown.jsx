@@ -1,12 +1,18 @@
-import React, { useMemo, useState } from 'react';
+import React, {
+  useMemo,
+  useRef,
+  useState,
+  useEffect,
+} from 'react';
 import Button from './Button';
 
 const Dropdown = ({
   label,
   trigger,
-  content,
+  children,
 }) => {
   const [opened, updateOpened] = useState(false);
+  const listRef = useRef();
 
   const openStatus = useMemo(
     () => {
@@ -19,8 +25,22 @@ const Dropdown = ({
     [opened],
   );
 
+  const handleClickOutside = (event) => {
+    if (!listRef || !listRef.current) {
+      return;
+    }
+
+    if (!listRef.current.contains(event.target)) {
+      updateOpened(false);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener('mousedown', handleClickOutside);
+  }, [listRef]);
+
   return (
-    <div className="dropdown cursor-pointer" onClick={() => updateOpened(!opened)}>
+    <div className="dropdown cursor-pointer" onClick={() => updateOpened(!opened)} ref={listRef}>
       {
         trigger
         || (
@@ -30,7 +50,7 @@ const Dropdown = ({
         )
       }
       <div className={`dropdown-content shadow-xl rounded-b-lg p-2 ${openStatus}`}>
-        {content}
+        {children}
       </div>
     </div>
   );
